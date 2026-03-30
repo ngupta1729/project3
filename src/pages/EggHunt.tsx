@@ -71,7 +71,9 @@ function StartScreen({ onStart }: { onStart: () => void }) {
         <p>🎨 Eggs change color, pattern, text &amp; symbols over time</p>
         <p>🔍 Spot the one that always follows the same rule</p>
         <p>🥚 You have <strong>3 attempts</strong> to identify it</p>
-        <p>⚡ Faster = higher score</p>
+        <p>⚡ Faster = more coins</p>
+        <p>🎯 First try = max coins — extra attempts reduce your score</p>
+        <p>💡 Revealing the clue comes at a cost too</p>
       </div>
 
       <Button
