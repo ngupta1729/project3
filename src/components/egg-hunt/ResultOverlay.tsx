@@ -49,35 +49,41 @@ export function ResultOverlay() {
                 <p className={cn('text-2xl font-extrabold', tier.color)}>{tier.label}</p>
               )}
 
-              {/* Score total */}
+              {/* Coin total */}
               {score && (
                 <>
-                  <div className="text-center">
+                  <div className="flex items-center justify-center gap-2">
                     <span className="text-5xl font-extrabold text-foreground tabular-nums">
                       {score.total}
                     </span>
-                    <span className="text-lg text-muted-foreground font-medium"> / 800</span>
+                    <span className="text-3xl">🪙</span>
                   </div>
 
                   {/* Breakdown */}
                   <div className="w-full bg-white/70 rounded-2xl px-4 py-3 text-sm ring-1 ring-purple-100 space-y-1.5">
                     <div className="flex justify-between items-center">
                       <span className="text-muted-foreground">⚡ Speed</span>
-                      <span className="font-semibold text-emerald-600">+{score.speedPoints}</span>
+                      <span className="font-semibold text-emerald-600">+{score.speedCoins} 🪙</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-muted-foreground">🎯 Attempts</span>
-                      <span className="font-semibold text-blue-600">+{score.attemptBonus}</span>
+                      <span className="font-semibold text-blue-600">+{score.attemptCoins} 🪙</span>
                     </div>
-                    {clueUsed && (
-                      <div className="flex justify-between items-center">
-                        <span className="text-muted-foreground">🔍 Clue used</span>
-                        <span className="font-semibold text-rose-500">−{score.cluePenalty}</span>
-                      </div>
+                    {score.clueApplied && (
+                      <>
+                        <div className="flex justify-between items-center border-t border-purple-100 pt-1.5">
+                          <span className="text-muted-foreground">Subtotal</span>
+                          <span className="tabular-nums">{score.subtotal} 🪙</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-muted-foreground">🔍 Clue used</span>
+                          <span className="font-semibold text-amber-600">× 0.8</span>
+                        </div>
+                      </>
                     )}
                     <div className="flex justify-between items-center border-t border-purple-100 pt-1.5 font-bold">
                       <span>Total</span>
-                      <span>{score.total}</span>
+                      <span>{score.total} 🪙</span>
                     </div>
                   </div>
                 </>

@@ -4,27 +4,38 @@ export type GamePhase = 'idle' | 'playing' | 'won' | 'lost';
 export type ScoreTier = 'excellent' | 'good' | 'slow';
 
 export interface ScoreBreakdown {
-  total: number;        // final clamped score
-  speedPoints: number;  // 0–500
-  attemptBonus: number; // 0, 150, or 300
-  cluePenalty: number;  // 0 or 200
+  total: number;        // final coins after clue multiplier
+  speedCoins: number;   // 50–300
+  attemptCoins: number; // 50, 150, or 300
+  subtotal: number;     // speedCoins + attemptCoins before clue
+  clueApplied: boolean; // whether 0.8× multiplier was applied
 }
 
+/**
+ * Coins = SpeedCoins + AttemptCoins  [× 0.8 if clue used]
+ *
+ * SpeedCoins  = 50 + floor(250 × max(0, 1 − seconds / 60))
+ *               → 300 at 0s · 50 minimum after 60s
+ * AttemptCoins = 300 (1st try) | 150 (2nd try) | 50 (3rd try)
+ * Clue         = multiplies total by 0.8 (always earns something)
+ *
+ * Max = 600 🪙  |  ≥450 = Excellent | 250–449 = Good | <250 = Keep Trying
+ */
 export function calculateScore(
   elapsedSeconds: number,
   wrongGuesses: number,
   clueUsed: boolean
 ): ScoreBreakdown {
-  const speedPoints = Math.max(0, Math.floor(500 * (1 - elapsedSeconds / 90)));
-  const attemptBonus = wrongGuesses === 0 ? 300 : wrongGuesses === 1 ? 150 : 0;
-  const cluePenalty = clueUsed ? 200 : 0;
-  const total = Math.max(0, speedPoints + attemptBonus - cluePenalty);
-  return { total, speedPoints, attemptBonus, cluePenalty };
+  const speedCoins = 50 + Math.floor(250 * Math.max(0, 1 - elapsedSeconds / 60));
+  const attemptCoins = wrongGuesses === 0 ? 300 : wrongGuesses === 1 ? 150 : 50;
+  const subtotal = speedCoins + attemptCoins;
+  const total = clueUsed ? Math.floor(subtotal * 0.8) : subtotal;
+  return { total, speedCoins, attemptCoins, subtotal, clueApplied: clueUsed };
 }
 
 export function getScoreTier(total: number): ScoreTier {
-  if (total >= 600) return 'excellent';
-  if (total >= 300) return 'good';
+  if (total >= 450) return 'excellent';
+  if (total >= 250) return 'good';
   return 'slow';
 }
 
