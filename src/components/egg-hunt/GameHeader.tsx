@@ -77,7 +77,7 @@ export function GameHeader() {
                 className="mt-1 text-xs px-4 py-1.5 rounded-full border border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100 active:scale-95 transition-all"
               >
                 🔍 Reveal Clue{' '}
-                <span className="opacity-60 font-normal">(may reduce coins)</span>
+                <span className="opacity-60 font-normal">(comes at a cost)</span>
               </motion.button>
             ) : (
               <motion.div
@@ -87,11 +87,10 @@ export function GameHeader() {
                 transition={{ duration: 0.3, ease: 'easeOut' }}
                 className="mt-1 w-full bg-amber-50 ring-1 ring-amber-200 rounded-2xl px-4 py-2.5 text-center"
               >
-                <p className="text-xs text-amber-600 font-medium mb-0.5">🔍 Clue revealed</p>
+                <p className="text-xs text-amber-600 font-medium mb-0.5">🔍 Clue</p>
                 <p className="text-sm font-semibold text-amber-900 leading-snug">
-                  {rule?.description}
+                  {rule?.clue}
                 </p>
-                <p className="text-xs text-amber-500 mt-1 opacity-70">−200 pts penalty applied</p>
               </motion.div>
             )}
           </AnimatePresence>

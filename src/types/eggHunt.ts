@@ -49,7 +49,8 @@ export interface EggVisualState {
 
 export interface GameRule {
   id: string;
-  description: string;
+  clue: string;        // Present tense — shown during gameplay when clue is revealed
+  description: string; // Past tense — shown after the game ends (won or lost)
   /** Ensures the real egg's next state obeys the rule. prev = current visual. */
   constrainRealEgg: (prev: EggVisualState, next: EggVisualState) => EggVisualState;
   /** Produces a state that clearly violates the rule (used for fake eggs). */
@@ -166,6 +167,7 @@ function makeStaticRules(): GameRule[] {
   return [
     {
       id: 'NO_TEXT',
+      clue: 'The real egg never has any text on it',
       description: 'The real egg never had any text on it',
       constrainRealEgg: (_prev, next) => ({ ...next, text: null }),
       violateFakeEgg: (next) => ({ ...next, text: pick(TEXT_OPTIONS) }),
@@ -173,6 +175,7 @@ function makeStaticRules(): GameRule[] {
     },
     {
       id: 'STATIC_COLOR',
+      clue: 'The real egg never changes its color',
       description: 'The real egg never changed its color',
       constrainRealEgg: (prev, next) => ({ ...next, color: prev.color }),
       violateFakeEgg: (next) => ({ ...next, color: pick(PASTEL_COLORS) }),
@@ -180,6 +183,7 @@ function makeStaticRules(): GameRule[] {
     },
     {
       id: 'NO_ROTATION',
+      clue: 'The real egg never rotates — it always stays perfectly upright',
       description: 'The real egg never rotated — it always stayed perfectly upright',
       constrainRealEgg: (_prev, next) => ({ ...next, rotationDeg: 0 }),
       violateFakeEgg: (next) => ({
@@ -190,6 +194,7 @@ function makeStaticRules(): GameRule[] {
     },
     {
       id: 'NO_SYMBOLS',
+      clue: 'The real egg never shows any symbols',
       description: 'The real egg never displayed any symbols',
       constrainRealEgg: (_prev, next) => ({ ...next, symbol: 'none' }),
       violateFakeEgg: (next) => ({ ...next, symbol: pick(NON_NONE_SYMBOLS) }),
@@ -197,6 +202,7 @@ function makeStaticRules(): GameRule[] {
     },
     {
       id: 'NO_PATTERN',
+      clue: 'The real egg is always a solid color — it never has any pattern',
       description: 'The real egg was always a solid color — it never had any pattern',
       constrainRealEgg: (_prev, next) => ({ ...next, pattern: 'none' }),
       violateFakeEgg: (next) => ({ ...next, pattern: pick(NON_NONE_PATTERNS) }),
@@ -204,6 +210,7 @@ function makeStaticRules(): GameRule[] {
     },
     {
       id: 'ALWAYS_TEXT',
+      clue: 'The real egg always has text displayed on it',
       description: 'The real egg always had text displayed on it',
       constrainRealEgg: (prev, next) => ({
         ...next,
@@ -214,6 +221,7 @@ function makeStaticRules(): GameRule[] {
     },
     {
       id: 'ALWAYS_ROTATING',
+      clue: 'The real egg is always tilted — it never sits perfectly upright',
       description: 'The real egg was always tilted — it never sat perfectly upright',
       constrainRealEgg: (prev, next) => {
         if (Math.abs(next.rotationDeg) < 8) {
@@ -227,6 +235,7 @@ function makeStaticRules(): GameRule[] {
     },
     {
       id: 'ALWAYS_SYMBOL',
+      clue: 'The real egg always has some symbol on it',
       description: 'The real egg always had some symbol on it',
       constrainRealEgg: (_prev, next) => ({
         ...next,
@@ -244,6 +253,7 @@ function makeParameterizedRules(): GameRule[] {
   const otherPatterns = ALL_PATTERNS.filter((p) => p !== alwaysPatternType);
   const alwaysPattern: GameRule = {
     id: `ALWAYS_PATTERN_${alwaysPatternType.toUpperCase()}`,
+    clue: `The real egg always has ${PATTERN_NAMES[alwaysPatternType]}`,
     description: `The real egg always had ${PATTERN_NAMES[alwaysPatternType]}`,
     constrainRealEgg: (_prev, next) => ({ ...next, pattern: alwaysPatternType }),
     violateFakeEgg: (next) => ({ ...next, pattern: pick(otherPatterns) }),
@@ -255,6 +265,7 @@ function makeParameterizedRules(): GameRule[] {
   const otherSymbols = ALL_SYMBOLS.filter((s) => s !== alwaysSymbolType);
   const alwaysSymbol: GameRule = {
     id: `ALWAYS_SYMBOL_${alwaysSymbolType.toUpperCase()}`,
+    clue: `The real egg always shows a ${SYMBOL_NAMES[alwaysSymbolType]}`,
     description: `The real egg always showed a ${SYMBOL_NAMES[alwaysSymbolType]}`,
     constrainRealEgg: (_prev, next) => ({ ...next, symbol: alwaysSymbolType }),
     violateFakeEgg: (next) => ({ ...next, symbol: pick(otherSymbols) }),
@@ -267,6 +278,7 @@ function makeParameterizedRules(): GameRule[] {
   const nonFamilyColors = [...PASTEL_COLORS].filter((c) => !familyColors.includes(c));
   const alwaysColorFamily: GameRule = {
     id: `ALWAYS_COLOR_FAMILY_${familyKey.toUpperCase()}`,
+    clue: `The real egg always stays in ${COLOR_FAMILY_NAMES[familyKey]}`,
     description: `The real egg always stayed in ${COLOR_FAMILY_NAMES[familyKey]}`,
     constrainRealEgg: (_prev, next) => ({
       ...next,
@@ -283,6 +295,7 @@ function makeParameterizedRules(): GameRule[] {
   const neverPatternType = pick(NON_NONE_PATTERNS);
   const neverPattern: GameRule = {
     id: `NEVER_PATTERN_${neverPatternType.toUpperCase()}`,
+    clue: `The real egg never has ${PATTERN_NAMES[neverPatternType]}`,
     description: `The real egg never had ${PATTERN_NAMES[neverPatternType]}`,
     constrainRealEgg: (_prev, next) => ({
       ...next,
