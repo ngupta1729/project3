@@ -7,24 +7,25 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useEggHuntStore } from '@/store/eggHuntStore';
+import { getScoreTier } from '@/types/eggHunt';
 import { cn } from '@/lib/utils';
 
-const SCORE_CONFIG = {
+const TIER_CONFIG = {
   excellent: { label: 'Excellent!', icon: '🏆', color: 'text-emerald-500' },
-  good: { label: 'Good!', icon: '🌟', color: 'text-amber-500' },
-  slow: { label: 'Keep practicing!', icon: '🐢', color: 'text-rose-400' },
+  good:      { label: 'Good!',      icon: '🌟', color: 'text-amber-500'   },
+  slow:      { label: 'Keep trying!', icon: '🐢', color: 'text-rose-400'  },
 } as const;
 
 export function ResultOverlay() {
-  const phase = useEggHuntStore((s) => s.phase);
-  const rule = useEggHuntStore((s) => s.rule);
-  const elapsedSeconds = useEggHuntStore((s) => s.elapsedSeconds);
-  const scoreTier = useEggHuntStore((s) => s.scoreTier);
+  const phase     = useEggHuntStore((s) => s.phase);
+  const rule      = useEggHuntStore((s) => s.rule);
+  const score     = useEggHuntStore((s) => s.score);
+  const clueUsed  = useEggHuntStore((s) => s.clueUsed);
   const startGame = useEggHuntStore((s) => s.startGame);
   const resetGame = useEggHuntStore((s) => s.resetGame);
 
   const isOpen = phase === 'won' || phase === 'lost';
-  const scoreConf = scoreTier ? SCORE_CONFIG[scoreTier] : null;
+  const tier = score ? TIER_CONFIG[getScoreTier(score.total)] : null;
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) resetGame(); }}>
@@ -36,24 +37,55 @@ export function ResultOverlay() {
         {phase === 'won' ? (
           <>
             <DialogHeader className="text-center space-y-1">
-              <div className="text-5xl mb-1">{scoreConf?.icon ?? '🎉'}</div>
+              <div className="text-5xl mb-1">{tier?.icon ?? '🎉'}</div>
               <DialogTitle className="text-2xl font-extrabold text-pink-600 text-center">
                 You found the real egg!
               </DialogTitle>
             </DialogHeader>
 
             <div className="flex flex-col items-center gap-3 py-1">
-              {scoreConf && (
-                <p className={cn('text-3xl font-extrabold', scoreConf.color)}>
-                  {scoreConf.label}
-                </p>
+              {/* Tier label */}
+              {tier && (
+                <p className={cn('text-2xl font-extrabold', tier.color)}>{tier.label}</p>
               )}
-              <p className="text-muted-foreground text-sm">
-                Time:{' '}
-                <span className="font-bold text-foreground tabular-nums">{elapsedSeconds}s</span>
-              </p>
+
+              {/* Score total */}
+              {score && (
+                <>
+                  <div className="text-center">
+                    <span className="text-5xl font-extrabold text-foreground tabular-nums">
+                      {score.total}
+                    </span>
+                    <span className="text-lg text-muted-foreground font-medium"> / 800</span>
+                  </div>
+
+                  {/* Breakdown */}
+                  <div className="w-full bg-white/70 rounded-2xl px-4 py-3 text-sm ring-1 ring-purple-100 space-y-1.5">
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">⚡ Speed</span>
+                      <span className="font-semibold text-emerald-600">+{score.speedPoints}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">🎯 Attempts</span>
+                      <span className="font-semibold text-blue-600">+{score.attemptBonus}</span>
+                    </div>
+                    {clueUsed && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">🔍 Clue used</span>
+                        <span className="font-semibold text-rose-500">−{score.cluePenalty}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between items-center border-t border-purple-100 pt-1.5 font-bold">
+                      <span>Total</span>
+                      <span>{score.total}</span>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Rule reveal */}
               {rule && (
-                <div className="bg-white/70 rounded-2xl px-4 py-3 text-sm text-purple-700 text-center ring-1 ring-purple-100 leading-snug">
+                <div className="bg-white/70 rounded-2xl px-4 py-3 text-sm text-purple-700 text-center ring-1 ring-purple-100 leading-snug w-full">
                   The rule was:{' '}
                   <span className="font-semibold italic">"{rule.description}"</span>
                 </div>
@@ -71,7 +103,7 @@ export function ResultOverlay() {
 
             <div className="flex flex-col items-center gap-3 py-1">
               <p className="text-muted-foreground text-sm">The hidden rule was:</p>
-              <div className="bg-white/70 rounded-2xl px-4 py-3 text-sm font-semibold text-purple-700 text-center ring-1 ring-purple-100 leading-snug">
+              <div className="bg-white/70 rounded-2xl px-4 py-3 text-sm font-semibold text-purple-700 text-center ring-1 ring-purple-100 leading-snug w-full">
                 "{rule?.description}"
               </div>
               <p className="text-xs text-muted-foreground italic">

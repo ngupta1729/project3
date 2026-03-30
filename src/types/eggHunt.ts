@@ -3,6 +3,31 @@ export type EggSymbol = 'none' | 'star' | 'heart' | 'flower' | 'moon' | 'sun';
 export type GamePhase = 'idle' | 'playing' | 'won' | 'lost';
 export type ScoreTier = 'excellent' | 'good' | 'slow';
 
+export interface ScoreBreakdown {
+  total: number;        // final clamped score
+  speedPoints: number;  // 0–500
+  attemptBonus: number; // 0, 150, or 300
+  cluePenalty: number;  // 0 or 200
+}
+
+export function calculateScore(
+  elapsedSeconds: number,
+  wrongGuesses: number,
+  clueUsed: boolean
+): ScoreBreakdown {
+  const speedPoints = Math.max(0, Math.floor(500 * (1 - elapsedSeconds / 90)));
+  const attemptBonus = wrongGuesses === 0 ? 300 : wrongGuesses === 1 ? 150 : 0;
+  const cluePenalty = clueUsed ? 200 : 0;
+  const total = Math.max(0, speedPoints + attemptBonus - cluePenalty);
+  return { total, speedPoints, attemptBonus, cluePenalty };
+}
+
+export function getScoreTier(total: number): ScoreTier {
+  if (total >= 600) return 'excellent';
+  if (total >= 300) return 'good';
+  return 'slow';
+}
+
 export interface EggVisualState {
   color: string;
   pattern: EggPattern;

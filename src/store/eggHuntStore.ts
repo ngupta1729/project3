@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import { pickRule, randomVisualState } from '@/types/eggHunt';
-import type { EggState, EggVisualState, GamePhase, GameRule, ScoreTier } from '@/types/eggHunt';
+import { pickRule, randomVisualState, calculateScore } from '@/types/eggHunt';
+import type { EggState, EggVisualState, GamePhase, GameRule, ScoreBreakdown } from '@/types/eggHunt';
 
 interface EggHuntStoreState {
   phase: GamePhase;
@@ -11,13 +11,15 @@ interface EggHuntStoreState {
   wrongGuesses: number[];
   startTime: number | null;
   elapsedSeconds: number;
-  scoreTier: ScoreTier | null;
+  clueUsed: boolean;
+  score: ScoreBreakdown | null;
   // Actions
   startGame: () => void;
   selectEgg: (index: number) => void;
   updateEggVisual: (index: number, visual: EggVisualState) => void;
   setEggWrong: (index: number, value: boolean) => void;
   incrementTimer: () => void;
+  useClue: () => void;
   resetGame: () => void;
 }
 
@@ -42,7 +44,8 @@ export const useEggHuntStore = create<EggHuntStoreState>((set, get) => ({
   wrongGuesses: [],
   startTime: null,
   elapsedSeconds: 0,
-  scoreTier: null,
+  clueUsed: false,
+  score: null,
 
   startGame: () => {
     const rule = pickRule();
@@ -57,21 +60,19 @@ export const useEggHuntStore = create<EggHuntStoreState>((set, get) => ({
       wrongGuesses: [],
       startTime: Date.now(),
       elapsedSeconds: 0,
-      scoreTier: null,
+      clueUsed: false,
+      score: null,
     });
   },
 
   selectEgg: (index) => {
-    const { phase, realEggIndex, attemptsRemaining, elapsedSeconds, wrongGuesses } = get();
+    const { phase, realEggIndex, attemptsRemaining, elapsedSeconds, wrongGuesses, clueUsed } = get();
     if (phase !== 'playing') return;
     if (wrongGuesses.includes(index)) return;
 
     if (index === realEggIndex) {
-      let scoreTier: ScoreTier;
-      if (elapsedSeconds < 10) scoreTier = 'excellent';
-      else if (elapsedSeconds < 25) scoreTier = 'good';
-      else scoreTier = 'slow';
-      set({ phase: 'won', scoreTier });
+      const score = calculateScore(elapsedSeconds, wrongGuesses.length, clueUsed);
+      set({ phase: 'won', score });
     } else {
       const newAttempts = attemptsRemaining - 1;
       set((state) => ({
@@ -82,7 +83,6 @@ export const useEggHuntStore = create<EggHuntStoreState>((set, get) => ({
         ),
         phase: newAttempts === 0 ? 'lost' : 'playing',
       }));
-      // Clear wrong-flash after 700ms
       setTimeout(() => {
         set((state) => ({
           eggs: state.eggs.map((egg, i) =>
@@ -109,6 +109,11 @@ export const useEggHuntStore = create<EggHuntStoreState>((set, get) => ({
     const { startTime, phase } = get();
     if (!startTime || phase !== 'playing') return;
     set({ elapsedSeconds: Math.floor((Date.now() - startTime) / 1000) });
+  },
+
+  useClue: () => {
+    if (get().phase !== 'playing') return;
+    set({ clueUsed: true });
   },
 
   resetGame: () => set({ phase: 'idle' }),
