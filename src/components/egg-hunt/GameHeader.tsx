@@ -76,8 +76,7 @@ export function GameHeader() {
                 onClick={useClue}
                 className="mt-1 text-xs px-4 py-1.5 rounded-full border border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100 active:scale-95 transition-all"
               >
-                🔍 Reveal Clue{' '}
-                <span className="opacity-60 font-normal">(comes at a cost)</span>
+                🔍 Reveal Clue
               </motion.button>
             ) : (
               <motion.div
