@@ -1,23 +1,3 @@
-# Rajesh P. — Portfolio + Egg Hunt
-
-Personal portfolio site for Rajesh P., founder of [CodePup AI](https://codepup.ai), product leader, and builder with 15+ years of experience across Zynga, Flipkart, and Walmart.
-
-Also includes a fully interactive Easter-themed browser game: **Egg Hunt**.
-
----
-
-## Portfolio (`/`)
-
-A minimal, fast-loading personal site covering:
-
-- **Hero** — intro, background, and links to work
-- **Stats** — career highlights at a glance
-- **Work** — bento grid showcasing CodePup AI, Zynga, Flipkart, and Walmart
-- **Teaching** — AI coding course for non-technical PMs and founders
-- **Contact** — email and LinkedIn
-
----
-
 ## Egg Hunt (`/egg-hunt`)
 
 An Easter-themed pattern puzzle game. One of nine animated eggs secretly follows a hidden rule — the others try to fool you.
